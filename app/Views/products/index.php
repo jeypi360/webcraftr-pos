@@ -10,10 +10,20 @@
 
     <p>Welcome, <?= esc(session('full_name')) ?>!</p>
 
+    <p>
+        <a href="/products/create">Add Product</a>
+    </p>
+
     <form action="/logout" method="post">
         <?= csrf_field() ?>
         <button type="submit">Log Out</button>
     </form>
+
+    <?php if (session()->getFlashdata('success')): ?>
+        <p style="color: green;">
+            <?= esc(session()->getFlashdata('success')) ?>
+        </p>
+    <?php endif; ?>
 
     <hr>
 
@@ -23,6 +33,7 @@
         <table border="1" cellpadding="10">
             <thead>
                 <tr>
+                    <th>Image</th>
                     <th>ID</th>
                     <th>Product</th>
                     <th>Price</th>
@@ -32,6 +43,17 @@
             <tbody>
                 <?php foreach ($products as $product): ?>
                     <tr>
+                        <td>
+                            <?php if (! empty($product['image'])): ?>
+                                <img
+                                    src="<?= base_url('uploads/products/' . $product['image']) ?>"
+                                    alt="<?= esc($product['name']) ?>"
+                                    width="80"
+                                >
+                            <?php else: ?>
+                                No image
+                            <?php endif; ?>
+                        </td>
                         <td><?= esc($product['id']) ?></td>
                         <td><?= esc($product['name']) ?></td>
                         <td>₱<?= number_format((float) $product['price'], 2) ?></td>
