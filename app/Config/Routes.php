@@ -13,3 +13,5 @@ $routes->post('/logout', 'Auth::logout');
 $routes->get('/products', 'Products::index', ['filter' => 'auth']);
 $routes->get('/products/create', 'Products::create', ['filter' => 'auth']);
 $routes->post('/products', 'Products::store', ['filter' => 'auth']);
+$routes->get('/products/(:num)/edit', 'Products::edit/$1', ['filter' => 'auth']);
+$routes->post('/products/(:num)', 'Products::update/$1', ['filter' => 'auth']);

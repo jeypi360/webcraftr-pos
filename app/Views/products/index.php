@@ -38,6 +38,7 @@
                     <th>Product</th>
                     <th>Price</th>
                     <th>Stock</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -58,6 +59,11 @@
                         <td><?= esc($product['name']) ?></td>
                         <td>₱<?= number_format((float) $product['price'], 2) ?></td>
                         <td><?= esc($product['stock_quantity']) ?></td>
+                        <td>
+                            <a href="/products/<?= esc($product['id']) ?>/edit">
+                                Edit
+                            </a>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
