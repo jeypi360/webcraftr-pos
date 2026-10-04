@@ -28,7 +28,7 @@ class Products extends BaseController
     {
         $rules = [
             'name'           => 'required|max_length[100]',
-            'price'          => 'required|decimal',
+            'price'          => 'required|decimal|greater_than_equal_to[0]',
             'stock_quantity' => 'required|integer|greater_than_equal_to[0]',
         ];
 
@@ -46,8 +46,22 @@ class Products extends BaseController
         $imageName = null;
 
         if ($image && $image->isValid() && ! $image->hasMoved()) {
-            $imageName = $image->getRandomName();
-            $image->move(FCPATH . 'uploads/products', $imageName);
+            $mime = $image->getMimeType();
+            $extension = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'][$mime] ?? null;
+            if ($extension === null) {
+                return redirect()->back()->withInput()->with('errors', ['image' => 'Choose a valid image.']);
+            }
+            $imageName = bin2hex(random_bytes(16)) . '.' . $extension;
+            $path = FCPATH . 'uploads/products/' . $imageName;
+            try {
+                service('image')->withFile($image->getTempName())->fit(400, 400, 'center')->save($path, 85);
+            } catch (\Throwable $exception) {
+                if (is_file($path)) {
+                    unlink($path);
+                }
+                log_message('error', 'Product image preparation failed: ' . $exception->getMessage());
+                return redirect()->back()->withInput()->with('errors', ['image' => 'Could not prepare the image. Check PHP GD and the uploads folder.']);
+            }
         }
 
         $productModel = new ProductModel();
@@ -90,7 +104,7 @@ class Products extends BaseController
 
         $rules = [
             'name'           => 'required|max_length[100]',
-            'price'          => 'required|decimal',
+            'price'          => 'required|decimal|greater_than_equal_to[0]',
             'stock_quantity' => 'required|integer|greater_than_equal_to[0]',
         ];
 
@@ -108,16 +122,24 @@ class Products extends BaseController
         $imageName = $product['image'];
 
         if ($image && $image->isValid() && ! $image->hasMoved()) {
-            $imageName = $image->getRandomName();
-            $image->move(FCPATH . 'uploads/products', $imageName);
-
-            if (! empty($product['image'])) {
-                $oldImagePath = FCPATH . 'uploads/products/' . $product['image'];
-
-                if (is_file($oldImagePath)) {
-                    unlink($oldImagePath);
-                }
+            $mime = $image->getMimeType();
+            $extension = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'][$mime] ?? null;
+            if ($extension === null) {
+                return redirect()->back()->withInput()->with('errors', ['image' => 'Choose a valid image.']);
             }
+            $imageName = bin2hex(random_bytes(16)) . '.' . $extension;
+            $path = FCPATH . 'uploads/products/' . $imageName;
+            try {
+                service('image')->withFile($image->getTempName())->fit(400, 400, 'center')->save($path, 85);
+            } catch (\Throwable $exception) {
+                if (is_file($path)) {
+                    unlink($path);
+                }
+                log_message('error', 'Product image preparation failed: ' . $exception->getMessage());
+                return redirect()->back()->withInput()->with('errors', ['image' => 'Could not prepare the image. Check PHP GD and the uploads folder.']);
+            }
+
+
         }
 
         $productModel->update($id, [
@@ -126,6 +148,13 @@ class Products extends BaseController
             'stock_quantity' => $this->request->getPost('stock_quantity'),
             'image'          => $imageName,
         ]);
+
+        if ($imageName !== $product['image'] && ! empty($product['image'])) {
+            $oldImagePath = FCPATH . 'uploads/products/' . basename($product['image']);
+            if (is_file($oldImagePath)) {
+                unlink($oldImagePath);
+            }
+        }
 
         return redirect()->to('/products')
             ->with('success', 'Product updated successfully.');

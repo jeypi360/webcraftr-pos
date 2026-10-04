@@ -68,18 +68,32 @@
 
         .button {
             display: inline-block;
+            min-width: 80px;
             margin-top: 15px;
             padding: 12px 20px;
-            color: var(--dark-green);
-            font-weight: bold;
-            text-decoration: none;
-            background: var(--gold-yellow);
+            border: 0;
             border-radius: 5px;
+            background: var(--gold-yellow);
+            color: var(--dark-green);
+            font-family: inherit;
+            font-size: inherit;
+            font-weight: bold;
+            line-height: normal;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
         }
 
         .button:hover {
             color: var(--white);
             background: var(--medium-green);
+        }
+
+        .logout-button {
+            min-width: 0;
+            margin-top: 0;
+            padding: 4px 9px;
+            font-size: 13px;
         }
 
         table {
@@ -108,6 +122,16 @@
             background: rgba(241, 178, 74, 0.20);
         }
 
+        .actions-cell {
+            text-align: center;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .actions-cell .button {
+            margin-top: 0;
+        }
+
         footer {
             padding: 20px;
             color: var(--dark-green);
@@ -120,10 +144,22 @@
     <nav>
         <span class="brand">POS</span>
 
-        <a href="/">Home</a>
-        <a href="/about">About</a>
-        <a href="/customers">Customers</a>
-        <a href="/users">Users</a>
+        <?php if (session('isLoggedIn')): ?>
+            <a href="<?= site_url('products') ?>">Products</a>
+            <a href="<?= site_url('customers') ?>">Customers</a>
+            <a href="<?= site_url('users') ?>">Staff</a>
+            <a href="<?= site_url('sales/new') ?>">Record Sale</a>
+            <a href="<?= site_url('sales') ?>">Sales History</a>
+
+            <form action="<?= site_url('logout') ?>" method="post">
+                <?= csrf_field() ?>
+                <button class="button logout-button" type="submit">
+                    Log Out
+                </button>
+            </form>
+        <?php else: ?>
+            <a href="<?= site_url('login') ?>">Log In</a>
+        <?php endif; ?>
     </nav>
 
     <main class="container">

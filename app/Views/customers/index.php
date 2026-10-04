@@ -2,16 +2,31 @@
 
 <h1>Customer Accounts</h1>
 
-<p>List of registered customer records retrieved from the database:</p>
+<a class="button" href="<?= site_url('customers/new') ?>">
+    New Customer
+</a>
+
+<?php if (session()->getFlashdata('success')): ?>
+    <p role="status">
+        <?= esc(session()->getFlashdata('success')) ?>
+    </p>
+<?php endif; ?>
+
+<?php if (session()->getFlashdata('error')): ?>
+    <p role="alert" style="color: #a00">
+        <?= esc(session()->getFlashdata('error')) ?>
+    </p>
+<?php endif; ?>
 
 <table>
     <thead>
         <tr>
             <th>ID</th>
-            <th>Customer Name</th>
-            <th>Email Address</th>
-            <th>Phone Number</th>
-            <th>Created At</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Created</th>
+            <th class="actions-cell">Actions</th>
         </tr>
     </thead>
 
@@ -23,6 +38,27 @@
                 <td><?= esc($customer['email']) ?></td>
                 <td><?= esc($customer['phone']) ?></td>
                 <td><?= esc($customer['created_at']) ?></td>
+
+                <td class="actions-cell">
+                    <a
+                        class="button"
+                        href="<?= site_url('customers/' . $customer['id'] . '/edit') ?>"
+                    >
+                        Edit
+                    </a>
+
+                    <form
+                        method="post"
+                        action="<?= site_url('customers/' . $customer['id'] . '/delete') ?>"
+                        style="display: inline"
+                        onsubmit="return confirm('Delete this customer?')"
+                    >
+                        <?= csrf_field() ?>
+                        <button class="button" type="submit">
+                            Delete
+                        </button>
+                    </form>
+                </td>
             </tr>
         <?php endforeach; ?>
     </tbody>
